@@ -25,6 +25,4 @@ When you're ready to export the data as a .xlsx file, feed the workbook instance
 
 As I said, there's currently not much to this functionality, but as I work on my grid widget I will continue to add to this repo. If I ever get to a stopping point with the [grid](https://github.com/mosbymc/HTML-Data-Grid-Widget) (not likely; do you have any idea how much functionality you can throw in a grid widget!!!), then I begin focusing more on this repository.
 
-Also, I'd like to give credit and say thank you to the creator of [this excel exporter](http://excelbuilderjs.com/). I have temporarily jacked a couple of helper functions until I have time to better suite their functionality to my needs. Also, this exporter helped get me started 
-
-
+Also, I'd like to give credit and say thank you to the creator of [this excel exporter](http://excelbuilderjs.com/). I have temporarily jacked a couple of helper functions until I have time to better suite their functionality to my needs. Also, this exporter gave me a few high-level design ideas.
