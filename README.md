@@ -14,7 +14,7 @@ Then call the 'createWorkBook' function off the exporter object thusly:
   var wb = excelExporter.createWorkBook();
 ```
 
-This will initialize a workbook instance and allow you to add a worksheet. To add a work sheet to the workbook instance, you must have an array of JSON data. The collection of columns and the sheet name are optional. To add a worksheet, call the 'createWorkSheet' function on the workbook instance thusly:
+This will initialize a workbook instance and allow you to add a worksheet. To add a work sheet to the workbook instance, you must have an array of JSON data. The collection of columns and the sheet name are optional. To add a worksheet, call the 'createWorkSheet' function on the workbook instance, passing in the your JSON data, and optional column definitions and worksheet name, thusly:
 ```javascript
   wb.createWorkSheet(data, columns, 'sheetname');
 ```
