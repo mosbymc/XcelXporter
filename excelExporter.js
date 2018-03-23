@@ -63,9 +63,8 @@ var excelExporter = (function _excelExporter() {
          */
         addAttributes: function _addAttributes(attrs) {
             var newAttributes = this.attributes || {};
-            for (var attr in attrs) {
-                newAttributes[attr] = attrs[attr];
-            }
+            Object.keys(attrs)
+                .forEach(attr => newAttributes[attr] = attrs[attr]);
             this.attributes = newAttributes;
             return this;
         },
@@ -98,8 +97,8 @@ var excelExporter = (function _excelExporter() {
                 while (!node.isRoot && node.parent) {
                     node = node.parent;
                 }
-                return node;
             }
+            return node;
         },
         createChildReturnParent: function _createChildReturnParent(props) {
             props.parent = this;
@@ -132,14 +131,10 @@ var excelExporter = (function _excelExporter() {
         toXmlString: function _toXmlString() {
             var string = '';
             string += '<' + this.nodeType;
-            for(var attr in this.attributes) {
-                string = string + ' ' + attr + '="' + escape(this.attributes[attr]) + '"';
-            }
+            this.attributes.forEach(attr => string = string + ' ' + attr + '="' + escape(this.attributes[attr]) + '"');
 
             var childContent = '';
-            for(var i = 0; i < this.children.length; i++) {
-                childContent += this.children[i].toXmlString();
-            }
+            this.children.forEach(child => childContent += child.toXmlString());
 
             if (this.textValue != null || childContent) string += '>' + (this.textValue || '') + childContent + '</' + this.nodeType + '>';
             else string += '/>';
@@ -172,9 +167,8 @@ var excelExporter = (function _excelExporter() {
         buildFiles('', wb.directory, files);
 
         var zip = new JSZip();
-        for (var file in files) {
-            zip.file(file.substr(1), files[file], { base64: false });
-        }
+        Object.keys(files)
+            .forEach(file => zip.file(file.substr(1), files[file], { base64: false }));
 
         zip.generateAsync({ compression: 'DEFLATE', type: 'base64', mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
             .then(function jsZipPromiseCallback(content) {
@@ -218,16 +212,14 @@ var excelExporter = (function _excelExporter() {
      */
     function buildFiles(path, directory, files) {
         path = path + '/';
-        for (var file in directory) {
-            if (xmlNode.isPrototypeOf(directory[file]))
-                files[path + directory[file].fileName] = directory[file].toXmlString();
-            else if (directory[file].constructor === Array) {
-                for (var i = 0; i < directory[file].length; i++) {
-                    files[path + directory[file][i][directory[file].fileName]] = directory[file][i].toXmlString();
+        Object.keys(directory)
+            .forEach(file => {
+                if (xmlNode.isPrototypeOf(directory[file])) files[path + directory[file].fileName] = directory[file].toXmlString()
+                else if (directory[file].constructor === Array) {
+                    directory[file].forEach(f => files[path + directory[file][i][directory[file].fileName]] = directory[file][i].toXmlString());
                 }
-            }
-            else if (typeof directory[file] === 'object') buildFiles(path + file, directory[file], files);
-        }
+                else if ('object' === typeof directory[file]) buildFiles(path + file, directory[file], files);
+            });
     }
 
     /**
@@ -239,7 +231,7 @@ var excelExporter = (function _excelExporter() {
      * Initializes a new instance of the workbook
      * @returns {workbook}
      */
-    workbook.init = function _init() {
+    workbook.init = function _workbookInitialization() {
         this.directory = {
             _rels: {},
             xl: {
@@ -385,8 +377,7 @@ var excelExporter = (function _excelExporter() {
     workbook._createRelation = function __createRelation(relationType, fileName) {
         var createRoot = false;
         if (relationType === 'root-rel') createRoot = true;
-        var rel = Object.create(relation).init(createRoot, fileName);
-        return this._insertObjectIntoDirectory(rel, relationType);
+        return this._insertObjectIntoDirectory(Object.create(relation).init(createRoot, fileName), relationType);
     };
 
     /**
@@ -396,8 +387,7 @@ var excelExporter = (function _excelExporter() {
      */
     workbook._createSharedStrings = function __createSharedStrings() {
         if (this.directory.xl['sharedStrings.xml']) return this;
-        var ss = Object.create(sharedStrings).init();
-        return this._insertObjectIntoDirectory(ss, 'sharedStrings');
+        return this._insertObjectIntoDirectory(Object.create(sharedStrings).init(), 'sharedStrings');
     };
 
     /**
@@ -407,8 +397,7 @@ var excelExporter = (function _excelExporter() {
      */
     workbook._createContentType = function __createContentType() {
         if (this.directory['[Content_Types].xml']) return this;
-        var ct = Object.create(contentType).init();
-        return this._insertObjectIntoDirectory(ct, '[Content_Types]');
+        return this._insertObjectIntoDirectory(Object.create(contentType).init(), '[Content_Types]');
     };
 
     /**
@@ -417,8 +406,7 @@ var excelExporter = (function _excelExporter() {
      */
     workbook._createCoreFileObject = function __createCoreFileObject() {
         if (this.directory.docProps['core.xml']) return this;
-        var coreFile = Object.create(core).init();
-        return this._insertObjectIntoDirectory(coreFile, 'core');
+        return this._insertObjectIntoDirectory(Object.create(core).init(), 'core');
     };
 
     /**
@@ -427,8 +415,7 @@ var excelExporter = (function _excelExporter() {
      */
     workbook._createAppFileObject = function __createAppFileObject() {
         if (this.directory.docProps['app.xml']) return this;
-        var appFile = Object.create(app).init();
-        return this._insertObjectIntoDirectory(appFile, 'app');
+        return this._insertObjectIntoDirectory(Object.create(app).init(), 'app');
     };
 
     /**
@@ -473,7 +460,7 @@ var excelExporter = (function _excelExporter() {
      * @param {string} tableId - The id of the table for the worksheet that was generated in the workbook
      * @returns {{worksheet: workSheet, sharedStrings: Array, table: table}}
      */
-    workSheet.init = function _init(data, columns, workSheetName, tableId) {
+    workSheet.init = function _worksheetInitialization(data, columns, workSheetName, tableId) {
         var sharedStrings = [],
             sharedStringsMap = {},
             i, count = 0, total = columns.length;
@@ -493,6 +480,7 @@ var excelExporter = (function _excelExporter() {
         this.name = workSheetName;
 
         if (!columns) {
+            //columns = data && data[0] ? Object.keys(data[0]) : [];
             columns = [];
             for (var item in data[0]) {
                 columns.push(item);
@@ -546,53 +534,39 @@ var excelExporter = (function _excelExporter() {
 
         var headerRowPos;
 
-        for (i = 0; i < columns.length; i++) {
-            var attrs = {};
-            if (columns[i].width) attrs = { width: columns[i].width };
+        columns.forEach((column, i) => {
+            let attrs = {};
+            if (column.width) attrs = { width: column.width };
             attrs.min = i + 1;
             attrs.max = i + 1;
             attrs.width = '10';
             attrs.bestFit = '1';
 
-            colContainer.createChild({
-                nodeType: 'col',
-                attributes: attrs
-            });
-            //TODO: Need to update logic here to check first if header is a string or not
-            sharedStrings.push(columns[i].toString());
-            sharedStringsMap[columns[i].toString()] = count.toString();
+            colContainer.createChild({ nodeType: 'col', attributes: attrs });
+            sharedStrings.push(column.toString());
+            sharedStringsMap[column.toString()] = count.toString();
             headerRowPos = positionToLetterRef((i + 1), 1);
 
             headerRow.createChildReturnChild({
                 nodeType: 'c',
-                attributes: {
-                    r: headerRowPos,
-                    t: 's'
-                }
-            }).createChild({
-                nodeType: 'v',
-                textValue: count.toString()
-            });
+                attributes: { r: headerRowPos, t: 's' }
+            }).createChild({ nodeType: 'v', textValue: count.toString() });
             count++;
-        }
+        });
 
-        for (i = 0; i < data.length; i++) {
-            var row = sheetdataNode.createChildReturnChild({
+        data.forEach((datum, i) => {
+            let row = sheetdataNode.createChildReturnChild({
                 nodeType: 'row',
-                attributes: {
-                    r: (i + 2).toString(),
-                    spans: '1:' + columns.length,
-                    'x14ac:dyDescent': '0.25'
-                }
+                attributes: { r: (i + 2).toString(), spans: '1:' + columns.length, 'x14ac:dyDescent': '0.25' }
             });
 
-            for (var j = 0; j < columns.length; j++) {
-                var cellLoc = positionToLetterRef((j + 1), (i + 2));
-                if (typeof data[i][columns[j]] !== 'number') {
+            columns.forEach((column, j) => {
+                let cellLoc = positionToLetterRef((j + 1), (i + 2));
+                if ('number' !== typeof datum[column]) {
                     total += 1;
-                    if (!sharedStringsMap[data[i][columns[j]].toString()]) {
-                        sharedStrings.push(data[i][columns[j]].toString());
-                        sharedStringsMap[data[i][columns[j]].toString()] = count.toString();
+                    if (!sharedStringsMap[datum[column].toString()]) {
+                        sharedStrings.push(datum[column].toString());
+                        sharedStringsMap[data[column].toString()] = count.toString();
 
                         row.createChildReturnChild({
                             nodeType: 'c',
@@ -631,7 +605,18 @@ var excelExporter = (function _excelExporter() {
                         textValue: data[i][columns[j]].toString()
                     });
                 }
-            }
+            });
+        });
+
+        for (i = 0; i < data.length; i++) {
+            var row = sheetdataNode.createChildReturnChild({
+                nodeType: 'row',
+                attributes: {
+                    r: (i + 2).toString(),
+                    spans: '1:' + columns.length,
+                    'x14ac:dyDescent': '0.25'
+                }
+            });
         }
 
         this.createChild({
@@ -656,8 +641,7 @@ var excelExporter = (function _excelExporter() {
             }
         });
 
-        var t = Object.create(table).init(columns, ref, tableId);
-        return { worksheet: this, sharedStrings: sharedStrings, table: t, total: total === -1 ? 0 : total };
+        return { worksheet: this, sharedStrings: sharedStrings, table: Object.create(table).init(columns, ref, tableId), total: total === -1 ? 0 : total };
     };
 
     /**
@@ -673,7 +657,7 @@ var excelExporter = (function _excelExporter() {
      * @param {string|number} tableId - The Id of the table
      * @returns {table}
      */
-    table.init = function _init(columns, ref, tableId) {
+    table.init = function _tableInitialization(columns, ref, tableId) {
         var name = 'table' + tableId;
         this.createXmlNode({
             nodeType: 'table',
@@ -701,19 +685,15 @@ var excelExporter = (function _excelExporter() {
                 }
             });
 
-        for (var i = 0; i < columns.length; i++) {
-            var columnName = '';
-            if (typeof columns[i] === 'object') columnName = columns[i].displayName || columns[i].name;
-            else columnName = columns[i];
-
+        columns.forEach((column, i) => {
             tableCols.createChild({
                 nodeType: 'tableColumn',
                 attributes: {
-                    id: (i+1),
-                    name: columnName
+                    id: (i + 1),
+                    name: 'object' === typeof column ? columns[i].displayName || column.name : column
                 }
             });
-        }
+        });
 
         this.createChild({
             nodeType: 'tableStyleInfo',
@@ -748,7 +728,7 @@ var excelExporter = (function _excelExporter() {
      * @param {string|undefined} fileName - The name of the xml file for this relation
      * @returns {relation}
      */
-    relation.init = function _init(createRootRelation, fileName) {
+    relation.init = function _relationInitialization(createRootRelation, fileName) {
         this.createXmlNode({
             nodeType: 'Relationships',
             isRoot: true,
@@ -796,7 +776,7 @@ var excelExporter = (function _excelExporter() {
      * workbook is initialized
      * @returns {sharedStrings}
      */
-    sharedStrings.init = function _init() {
+    sharedStrings.init = function _sharedStringsInitialization() {
         this.createXmlNode({
             nodeType: 'sst',
             isRoot: true,
@@ -817,13 +797,10 @@ var excelExporter = (function _excelExporter() {
      * @returns {sharedStrings}
      */
     sharedStrings.addEntries = function _addEntries(values, count) {
-        for (var i = 0; i < values.length; i++) {
+        values.forEach(value => {
             this.createChildReturnChild({ nodeType: 'si' })
-                .createChild({
-                nodeType: 't',
-                textValue: values[i]
-            });
-        }
+                .createChild({ nodeType: 't', textValue: value });
+        });
         this.addAttributes({
             uniqueCount: values.length,
             count: count
@@ -909,7 +886,7 @@ var excelExporter = (function _excelExporter() {
 
     var core = Object.create(xmlNode);
 
-    core.init = function _init() {
+    core.init = function _coreInitialization() {
         var curDate = new Date().toISOString();
         this.createXmlNode({
             nodeType: 'cp:coreProperties',
@@ -942,7 +919,7 @@ var excelExporter = (function _excelExporter() {
 
     var app = Object.create(xmlNode);
 
-    app.init = function _init() {
+    app.init = function _appInitialization() {
         var heading = this.createXmlNode({
             nodeType: 'Properties',
             isRoot: true,
@@ -990,8 +967,7 @@ var excelExporter = (function _excelExporter() {
 
     function escape(string) {
         string = baseToString(string);
-        var reHasUnescapedHtml = new RegExp('[&<>"\'`]');
-        return (string && reHasUnescapedHtml.test(string)) ? string.replace(/[&<>"'`]/g, escapeHtmlChar) : string;
+        return (string && new RegExp('[&<>"\'`]').test(string)) ? string.replace(/[&<>"'`]/g, escapeHtmlChar) : string;
     }
 
     function baseToString(value) {
