@@ -1,4 +1,4 @@
-import { xmlNode } from './excel_exporter_es6';
+import { xmlNode } from './xmlNode';
 
 var styles = Object.create(xmlNode);
 
@@ -65,3 +65,5 @@ styles.init = function _init() {
 
     return this;
 };
+
+export { styles };
