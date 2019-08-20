@@ -19,7 +19,7 @@ This will initialize a workbook instance and allow you to add a worksheet. To ad
   wb.createWorkSheet(data, columns, 'sheetname');
 ```
 When you're ready to export the data as a .xlsx file, feed the workbook instance to the exporter's 'exportWorkBook' function like so:
-```
+```javascript
   excelExporter.exportWorkBook(wb);
 ```
 

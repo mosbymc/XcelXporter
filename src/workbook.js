@@ -18,7 +18,7 @@ var workbook = Object.create(xmlNode);
  * Initializes a new instance of the workbook
  * @returns {workbook}
  */
-workbook.init = function _init() {
+workbook.init = function _initWorkbook() {
     this.directory = {
         _rels: {},
         xl: {
@@ -149,10 +149,8 @@ workbook.createWorkSheet = function __createWorkSheet(data, columns, name) {
  */
 workbook._createStyleSheet = function __createStyleSheet(styles) {
     if (this.directory['styles.xml']) return this;
-    var relationId = generateId('rId');
-    var style = Object.create(styles).init(styles);
-    this._insertObjectIntoDirectory(style, 'stylesheet');
-    this.directory.xl._rels.addRelation(relationId, 'stylesheet', 'styles.xml');
+    this._insertObjectIntoDirectory(Object.create(styles).init(styles), 'stylesheet');
+    this.directory.xl._rels.addRelation(generateId('rId'), 'stylesheet', 'styles.xml');
     return this;
 };
 
@@ -165,8 +163,7 @@ workbook._createStyleSheet = function __createStyleSheet(styles) {
 workbook._createRelation = function __createRelation(relationType, fileName) {
     var createRoot = false;
     if (relationType === 'root-rel') createRoot = true;
-    var rel = Object.create(relation).init(createRoot, fileName);
-    return this._insertObjectIntoDirectory(rel, relationType);
+    return this._insertObjectIntoDirectory(Object.create(relation).init(createRoot, fileName), relationType);
 };
 
 /**
@@ -176,8 +173,7 @@ workbook._createRelation = function __createRelation(relationType, fileName) {
  */
 workbook._createSharedStrings = function __createSharedStrings() {
     if (this.directory.xl['sharedStrings.xml']) return this;
-    var ss = Object.create(sharedStrings).init();
-    return this._insertObjectIntoDirectory(ss, 'sharedStrings');
+    return this._insertObjectIntoDirectory(Object.create(sharedStrings).init(), 'sharedStrings');
 };
 
 /**
@@ -187,8 +183,7 @@ workbook._createSharedStrings = function __createSharedStrings() {
  */
 workbook._createContentType = function __createContentType() {
     if (this.directory['[Content_Types].xml']) return this;
-    var ct = Object.create(contentType).init();
-    return this._insertObjectIntoDirectory(ct, '[Content_Types]');
+    return this._insertObjectIntoDirectory(Object.create(contentType).init(), '[Content_Types]');
 };
 
 /**
@@ -197,8 +192,7 @@ workbook._createContentType = function __createContentType() {
  */
 workbook._createCoreFileObject = function __createCoreFileObject() {
     if (this.directory.docProps['core.xml']) return this;
-    var coreFile = Object.create(core).init();
-    return this._insertObjectIntoDirectory(coreFile, 'core');
+    return this._insertObjectIntoDirectory(Object.create(core).init(), 'core');
 };
 
 /**
@@ -207,14 +201,12 @@ workbook._createCoreFileObject = function __createCoreFileObject() {
  */
 workbook._createAppFileObject = function __createAppFileObject() {
     if (this.directory.docProps['app.xml']) return this;
-    var appFile = Object.create(app).init();
-    return this._insertObjectIntoDirectory(appFile, 'app');
+    return this._insertObjectIntoDirectory(Object.create(app).init(), 'app');
 };
 
 workbook._createStylesFileObject = function __createStylesFileObject() {
     if (this.directory['styles.xml']) return this;
-    var stylesFile = Object.create(styles).init();
-    return this._insertObjectIntoDirectory(stylesFile, 'styles');
+    return this._insertObjectIntoDirectory(Object.create(styles).init(), 'styles');
 };
 
 /**

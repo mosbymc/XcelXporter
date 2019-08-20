@@ -1,0 +1,94 @@
+{
+  "name": "xcelxporter",
+  "version": "1.0.0",
+  "description": "A library for creating and exporting .xlxs files from JSON data",
+  "main": "xcel_xporter.js",
+  "scripts": {
+    "t": "npm run bundle && npm run minify",
+    "babel": "babel src --out-dir src && npm version patch",
+    "build": "npm run lint && npm test && npm run bundle && npm run minify",
+    "build:full": "npm run build && npm run documentation",
+    "prebuild:dev": "del-cli dev_browser/pointfree.js",
+    "build:dev": "npm run lint && npm test && npm run bundle:dev",
+    "prebundle": "del-cli dist/*",
+    "bundle": "./node_modules/.bin/browserify index.js -t [ babelify --presets [es2015] --plugins [ transform-es2015-modules-commonjs babel-polyfill ] --only src ] -o dist/xcelXporter.js",
+    "bundle:dev": "./node_modules/.bin/browserify index.js -t [ babelify --presets [es2015] --plugins [ transform-es2015-modules-commonjs babel-polyfill --sourcemaps true ] --only src ] -d -o dev_browser/xcelXporter.js",
+    "bundle:minify": "npm run bundle && npm run minify",
+    "clean": "npm run clean:build && npm run clean:coverage && npm run clean:dev && npm run clean:plato",
+    "clean:build": "del-cli dist/*",
+    "clean:coverage": "del-cli coverage/*",
+    "clean:dev_browser": "del-cli dev_browser/*",
+    "clean:plato": "del-cli plato/*",
+    "codeclimate:coverage": "cross-env CODECLIMATE_REPO_TOKEN=88f6338a30b9b3b63e26685f78c813c4ca0448d6e21b7f2fed6878ccc11e7f47 ./node_modules/.bin/codeclimate-test-reporter < ./coverage/lcov.info",
+    "precoverage": "del-cli coverage/*",
+    "coverage": "cross-env NODE_ENV=test nyc mocha --recursive test/unit",
+    "coverage:report": "nyc report --reporter=text-lcov",
+    "predocumentation": "del-cli documentation/*",
+    "documentation": "./node_modules/.bin/jsdoc -r src -d documentation -R ./README.md -c jsdoc.conf.json -t ./node_modules/ink-docstrap/template",
+    "eslint": "./node_modules/.bin/eslint src",
+    "jshint": "./node_modules/.bin/jshint src",
+    "lint": "npm run jshint && npm run eslint",
+    "lint:test": "npm run lint && npm test",
+    "lint:test:coverage": "npm run lint && npm run coverage",
+    "minify": "uglifyjs dist/xcelXporter.js -o dist/xcelXporter.min.js -c -m --source-map",
+    "preplato": "del-cli plato",
+    "plato": "plato -r -d plato -l .jshintrc -e .eslintrc.json -t 'pointfree-js' -n src/*.js && del-cli tmpPlato",
+    "postPlato": "del-cli tmpPlato",
+    "serve:dev": "npm run build:dev && nodemon ./app.js localhost 3030",
+    "snyk": "./node_modules/.bin/snyk test",
+    "start": "node app.js 3000",
+    "test": "cross-env NODE_ENV=test mocha --recursive test/unit --require babel-polyfill --require test/test_helper --compilers js:babel-register"
+  },
+  "nyc": {
+    "sourceMap": false,
+    "instrument": false,
+    "tempDirectory": "./coverage/nyc_raw",
+    "reporter": [
+      "text",
+      "lcov"
+    ],
+    "require": [
+      "babel-polyfill",
+      "babel-register",
+      "./test/test_helper.js"
+    ],
+    "exclude": [
+      "test",
+      "src/dataStructures/_lazy_identity.js"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mosbymc/XcelXporter.git"
+  },
+  "keywords": [
+    "excel",
+    "xlxs",
+    "xls"
+  ],
+  "author": "mosbymc",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mosbymc/XcelXporter/issues"
+  },
+  "homepage": "https://github.com/mosbymc/XcelXporter#readme",
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.3",
+    "babel-plugin-istanbul": "^5.2.0",
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-polyfill": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
+    "babel-register": "^6.26.0",
+    "babelify": "^10.0.0",
+    "browserify": "^16.5.0",
+    "del-cli": "^2.0.0",
+    "google-closure-compiler-js": "^20190729.0.0",
+    "nyc": "^14.1.1",
+    "source-map-support": "^0.5.13",
+    "uglify-js": "^3.6.0",
+    "wallabify": "0.0.15"
+  },
+  "dependencies": {}
+}
