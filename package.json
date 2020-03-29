@@ -2,7 +2,7 @@
   "name": "xcelxporter",
   "version": "1.0.0",
   "description": "A library for creating and exporting .xlxs files from JSON data",
-  "main": "xcel_xporter.js",
+  "main": "src/xcel_xporter.js",
   "scripts": {
     "t": "npm run bundle && npm run minify",
     "babel": "babel src --out-dir src && npm version patch",
@@ -11,7 +11,7 @@
     "prebuild:dev": "del-cli dev_browser/pointfree.js",
     "build:dev": "npm run lint && npm test && npm run bundle:dev",
     "prebundle": "del-cli dist/*",
-    "bundle": "./node_modules/.bin/browserify index.js -t [ babelify --presets [es2015] --plugins [ transform-es2015-modules-commonjs babel-polyfill ] --only src ] -o dist/xcelXporter.js",
+    "bundle": "./node_modules/.bin/browserify ./src/xcel_xporter.js -t [ babelify --presets [es2015] --plugins [ transform-es2015-modules-commonjs babel-polyfill ] --only src ] -o dist/xcelXporter.js",
     "bundle:dev": "./node_modules/.bin/browserify index.js -t [ babelify --presets [es2015] --plugins [ transform-es2015-modules-commonjs babel-polyfill --sourcemaps true ] --only src ] -d -o dev_browser/xcelXporter.js",
     "bundle:minify": "npm run bundle && npm run minify",
     "clean": "npm run clean:build && npm run clean:coverage && npm run clean:dev && npm run clean:plato",
@@ -73,6 +73,10 @@
   },
   "homepage": "https://github.com/mosbymc/XcelXporter#readme",
   "devDependencies": {
+    "@babel/cli": "^7.5.5",
+    "@babel/core": "^7.5.5",
+    "@babel/polyfill": "^7.4.4",
+    "@babel/preset-env": "^7.5.5",
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.3",
     "babel-plugin-istanbul": "^5.2.0",
